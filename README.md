@@ -1,3 +1,7 @@
+<span class="badge-placeholder">[![Stars](https://img.shields.io/github/stars/ekcbw/pyobject)](https://img.shields.io/github/stars/ekcbw/pyobject)</span>
+<span class="badge-placeholder">[![GitHub release](https://img.shields.io/github/v/release/ekcbw/pyobject)](https://github.com/ekcbw/pyobject/releases/latest)</span>
+<span class="badge-placeholder">[![License: MIT](https://img.shields.io/github/license/ekcbw/pyobject)](https://github.com/ekcbw/pyobject/blob/main/LICENSE)</span>
+
 pyobject - 一个多功能合一的提供操作Python对象底层工具的Python包, 支持几乎所有Python 3版本。
 A multifunctional all-in-one utility tool for managing internal Python objects, compatible with nearly all Python 3 versions.
 

@@ -286,10 +286,10 @@ class ObjChain:
         else:
             codes = self.codes[start_lineno:end_lineno]
         return "\n".join(codes)
-    def get_optimized_code(self, no_optimize_vars=None, remove_internal=True,
+    def get_optimized_code(self, no_optimize_vars=None, remove_internal_level=1,
                            remove_export_type=True):
         return optimize_code(self.codes, self.code_vars, no_optimize_vars,
-                             remove_internal, remove_export_type)
+                             remove_internal_level, remove_export_type)
     def eval_value(self,var_name=None,start_lineno=None,end_lineno=None):
         # 一次性执行未执行过的代码（仅用于没有target_obj时）
         if end_lineno is None:end_lineno = len(self.codes)
@@ -370,7 +370,7 @@ def magic_meth_chained(fmt = None, use_newvar = True, export = False,
             DEFAULT_EXPORT_FUNCS.append(meth_name) # 自动生成常量DEFAULT_EXPORT_FUNCS
         @functools.wraps(meth)
         def override(self, *args, **kw):
-            chain = self._ProxiedObj__chain
+            chain = self._ProxiedObj__chain # 避免属性访问开销
             self_name = self._ProxiedObj__name
             target_obj = self._ProxiedObj__target_obj
             no_target_obj = target_obj is EMPTY_OBJ
@@ -572,7 +572,7 @@ class ProxiedObj:
     __repr__ = magic_meth_chained("{_var} = repr({_self})",export=True)(repr)
     __dir__ = magic_meth_chained("{_var} = dir({_self})",export=True)(dir)
     __setattr__ = magic_meth_chained("{_self}.{} = {!r}", False)(setattr)
-    __delattr__ = magic_meth_chained("del {_self}{}", False)(delattr)
+    __delattr__ = magic_meth_chained("del {_self}.{}", False)(delattr)
 
     # 算术运算符
     @magic_meth_chained("{_var} = {_self} + {!r}")
@@ -715,6 +715,7 @@ class ProxiedObj:
     @magic_meth_chained(default_fmt=True,export=True)
     def __fspath__(self):return self.__fspath__()
 
+@functools.lru_cache(maxsize=None)
 def proxyCls(T=_EmptyTarget, chain=EMPTY_OBJ, fromvar=None):
     # 泛型，proxyCls(T)生成类型信息为T的继承自ProxiedObj的类
     if T is EMPTY_OBJ:

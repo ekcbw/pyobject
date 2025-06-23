@@ -150,7 +150,7 @@ The code argument can be either Code or the built-in CodeType."""
         return Code(self)
     def __getattr__(self,name):
         if _is_py310 and name=="co_lnotab":
-            name=co_linetable # 兼容旧版本
+            name="co_linetable" # 兼容旧版本
         _args=object.__getattribute__(self,'_args')
         if name in _args:
             return _args[name]

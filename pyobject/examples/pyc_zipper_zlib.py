@@ -1,7 +1,7 @@
 # 使用zlib的pyc文件压缩、保护工具
 import sys,marshal,zlib
 from inspect import iscode
-from pyobject.code_ import Code
+from pyobject.code import Code
 try:
     from importlib._bootstrap_external import MAGIC_NUMBER
 except ImportError:

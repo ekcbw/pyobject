@@ -128,7 +128,7 @@ def optimize_code(codes, code_vars, no_optimize_vars=None,
                   remove_internal_level=1, remove_export_type=True,
                   optimize_imports=True):
     # no_optimize_vars: 不能移除的变量名的列表
-    # remove_internal_level: 移除层数>=这个值的代码 (设为负数如-1则不移除)
+    # remove_internal_level: 移除层数>=这个值的代码 (设为负数如-1则不移除，层数越小移除越多)
     # remove_export_type: 移除无用的类型导出，如str(var)
     graph = VarGraph(codes,code_vars,no_optimize_vars)
     statement_cnt = len(graph.statements)

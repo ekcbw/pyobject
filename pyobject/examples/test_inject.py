@@ -1,4 +1,4 @@
-from pyobject.code_ import Code
+from pyobject.code import Code
 from inspect import iscode
 import marshal,os,sys
 try:

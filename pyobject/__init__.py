@@ -6,7 +6,7 @@ import sys
 from warnings import warn
 from pprint import pprint
 
-__version__="1.3.0"
+__version__="1.3.2"
 
 __all__=["objectname","bases","describe","desc"]
 _ignore_names=["__builtins__","__doc__"]
@@ -99,8 +99,9 @@ except ImportError:warn("Failed to import pyobject.pyobj_extension.")
 try:
     from pyobject.objproxy import ObjChain,ProxiedObj,unproxy_obj
     __all__.extend(["ObjChain","ProxiedObj","unproxy_obj"])
-except (ImportError, SyntaxError):
-    warn("Failed to import pyobject.objproxy.") # Python 3.5及以下不支持f-string，无法使用objproxy库
+except (ImportError, SyntaxError) as err:
+    # Python 3.5及以下不支持f-string
+    warn("Failed to import pyobject.objproxy (%s): %s"%(type(err).__name__,err))
 
 def desc_demo():
     try:

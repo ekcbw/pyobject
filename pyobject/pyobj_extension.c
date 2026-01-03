@@ -49,10 +49,10 @@ PyDoc_STRVAR(setrefcount_nogil_doc, u8"setrefcount_nogil(obj,ref_data)\n"
 #endif
 
 #if PY_MINOR_VERSION >= 13
-#define _PY313
+#define _PY313PLUS
 #if defined(Py_GIL_DISABLED)
-// _PY313_NO_GIL: 是否启用无GIL的引用计数功能
-#define _PY313_NO_GIL
+// _PY313PLUS_NO_GIL: 是否启用无GIL的引用计数功能
+#define _PY313PLUS_NO_GIL
 #endif
 
 // 兼容旧版本Python
@@ -70,7 +70,7 @@ PyDoc_STRVAR(setrefcount_nogil_doc, u8"setrefcount_nogil(obj,ref_data)\n"
 #endif
 
 #if PY_MINOR_VERSION >= 12
-#define _PY312P /* 3.12+所有版本 */
+#define _PY312PLUS /* 3.12+所有版本 */
 #endif
 
 // TODO: 临时在posix禁用python 3.12+特性
@@ -78,12 +78,12 @@ PyDoc_STRVAR(setrefcount_nogil_doc, u8"setrefcount_nogil(obj,ref_data)\n"
 #ifdef _PY312
 #undef _PY312
 #endif
-#ifdef _PY312P
-#undef _PY312P
+#ifdef _PY312PLUS
+#undef _PY312PLUS
 #endif
 #endif
 
-#ifdef _PY312P
+#ifdef _PY312PLUS
 #define Py_BUILD_CORE
 #include <internal/pycore_object.h>        // _PyType_HasFeature()
 #include <internal/pycore_typeobject.h>    // struct type_cache
@@ -122,8 +122,8 @@ PyObject *py_decref(PyObject *self, PyObject *args) {
 }
 
 PyObject *getrealrefcount(PyObject *self, PyObject *args) {
-#ifdef _PY313_NO_GIL
-    PyErr_SetString(PyExc_NotImplementedError, "getrealrefcount is not available in GIL-free versions of Python 3.13+");
+#ifdef _PY313PLUS_NO_GIL
+    PyErr_SetString(PyExc_RuntimeError, "getrealrefcount is not available in GIL-free versions of Python 3.13+");
     return NULL;
 #else
     PyObject *obj;
@@ -134,8 +134,8 @@ PyObject *getrealrefcount(PyObject *self, PyObject *args) {
 #endif
 }
 PyObject *setrefcount(PyObject *self, PyObject *args, PyObject *kwargs) {
-#ifdef _PY313_NO_GIL
-    PyErr_SetString(PyExc_NotImplementedError, "setrefcount is not available in GIL-free versions of Python 3.13+");
+#ifdef _PY313PLUS_NO_GIL
+    PyErr_SetString(PyExc_RuntimeError, "setrefcount is not available in GIL-free versions of Python 3.13+");
     return NULL;
 #else
     PyObject *obj;Py_ssize_t n;
@@ -148,8 +148,8 @@ PyObject *setrefcount(PyObject *self, PyObject *args, PyObject *kwargs) {
 #endif
 }
 PyObject *getrefcount_nogil(PyObject *self, PyObject *args){
-#ifndef _PY313_NO_GIL
-    PyErr_SetString(PyExc_NotImplementedError, "getrefcount_nogil is only available in GIL-free versions of Python 3.13+");
+#ifndef _PY313PLUS_NO_GIL
+    PyErr_SetString(PyExc_RuntimeError, "getrefcount_nogil is only available in GIL-free versions of Python 3.13+");
     return NULL;
 #else
     PyObject *obj;
@@ -163,8 +163,8 @@ PyObject *getrefcount_nogil(PyObject *self, PyObject *args){
 #endif
 }
 PyObject *setrefcount_nogil(PyObject *self, PyObject *args, PyObject *kwargs){
-#ifndef _PY313_NO_GIL
-    PyErr_SetString(PyExc_NotImplementedError, "setrefcount_nogil is only available in GIL-free versions of Python 3.13+");
+#ifndef _PY313PLUS_NO_GIL
+    PyErr_SetString(PyExc_RuntimeError, "setrefcount_nogil is only available in GIL-free versions of Python 3.13+");
     return NULL;
 #else
     PyObject *obj = NULL;
@@ -293,7 +293,7 @@ static PyObject* set_type_mro(PyObject *self, PyObject *args, PyObject *kwargs) 
 #define managed_static_type_state static_builtin_state /* 兼容3.12 */
 #endif
 PyObject **_lookup_tp_subclasses(PyTypeObject *self){ // 从解释器的实现typeobject.c复制
-    #ifdef _PY312P
+    #ifdef _PY312PLUS
     if (self->tp_flags & _Py_TPFLAGS_STATIC_BUILTIN) {
         PyInterpreterState *interp = _PyInterpreterState_GET();
         managed_static_type_state *state = _PyStaticType_GetState(interp, self);
@@ -350,7 +350,7 @@ static PyObject* set_type_subclasses_by_cls(PyObject *self, PyObject *args, PyOb
 }
 
 // -- 3.12+的外部符号 --
-#ifdef _PY312P
+#ifdef _PY312PLUS
 static inline size_t
 managed_static_type_index_get(PyTypeObject *self)
 {

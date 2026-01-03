@@ -1,10 +1,10 @@
 "以图形方式浏览Python对象的模块。A module providing a visual interface to browse Python objects."
-import sys,os,types,typing,ctypes
+import sys,os,types,ctypes
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.messagebox as msgbox
 import tkinter.simpledialog as simpledialog
-from inspect import isfunction,ismethod,isgeneratorfunction,isgenerator,iscode,ismodule
+from inspect import iscode,ismodule
 try:
     from types import WrapperDescriptorType,MethodWrapperType,\
                       MethodDescriptorType,ClassMethodDescriptorType
@@ -13,8 +13,9 @@ except ImportError: # 低于3.7的版本
                        MethodDescriptorType
     ClassMethodDescriptorType = type(dict.__dict__['fromkeys'])
 
-try:from pyobject import objectname,shortrepr
-except ImportError:from __init__ import objectname,shortrepr
+try:from pyobject import objectname,shortrepr,isfunc
+except ImportError:
+    from __init__ import objectname,shortrepr,isfunc
 
 
 _IMAGE_PATH=os.path.join(os.path.split(__file__)[0],"images")
@@ -24,27 +25,15 @@ TYPE_EXTRA_ATTRS = ("__basicsize__","__dictoffset__","__flags__",
     "__itemsize__","__weakrefoffset__")
 TYPE_EXTRA_CLASS_ATTRS = ("__base__","__bases__","__mro__")
 
-def isfunc(obj):
-    # 判断一个对象是否为函数或方法
-    if isfunction(obj) or ismethod(obj):return True
-    # 使用typing而不用types.WrapperDescriptorType是为了与旧版本兼容
-    func_types=[types.LambdaType,types.BuiltinFunctionType,
-                types.BuiltinMethodType,WrapperDescriptorType,
-                MethodWrapperType,MethodDescriptorType,
-                ClassMethodDescriptorType]
-    for type_ in func_types:
-        if isinstance(obj,type_):
-            return True
-    return False
 def isdict(obj):
-    # 判断一个对象是否为字典
+    # 判断对象是否为字典
     dict_types=[dict,types.MappingProxyType]
     for type in dict_types:
         if isinstance(obj,type):return True
     return False
 
 def get_dpi_scale():
-    # 获取Windows的当前DPI，仅Windows可用
+    # 获取Windows的当前DPI，仅Windows
     hdc = ctypes.windll.user32.GetDC(0)
     dpi_x = ctypes.windll.gdi32.GetDeviceCaps(hdc, 88)  # 88: LOGPIXELSX
     dpi_y = ctypes.windll.gdi32.GetDeviceCaps(hdc, 90)  # 90: LOGPIXELSY

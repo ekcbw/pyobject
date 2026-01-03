@@ -1,5 +1,3 @@
-include pyobject/examples/*
 include pyobject/images/*
 include pyobject/objproxy/*
-include pyobject/other/*
 include pyobject/tests/*

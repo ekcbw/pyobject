@@ -25,10 +25,11 @@ class Code:
 >>> def f():print("Hello")
 
 >>> c=Code.fromfunc(f)
->>> c.co_consts
-(None, 'Hello')
->>> # c.co_consts=(None, 'Hello World!') # 原来的代码
->>> c.co_consts=tuple(('Hello World!' if item=='Hello' else item) for item in c.co_consts) # 兼容3.14，3.14中c.consts为('Hello', None)
+>>> c.co_consts in [(None, 'Hello'), ('Hello', None)]
+True
+>>> # c.co_consts=(None, 'Hello World!') # 原先的代码
+>>> # 兼容3.14，3.14中c.consts为('Hello', None)
+>>> c.co_consts=tuple(('Hello World!' if item=='Hello' else item) for item in c.co_consts)
 >>> c.exec()
 Hello World!
 >>> 

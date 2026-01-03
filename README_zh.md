@@ -24,18 +24,20 @@ pyobject.pyobj_extension - C扩展模块, 提供操作Python对象底层的函�
 
 - maxlevel: 打印对象属性的层数。
 - tab: 缩进的空格数，默认为4。
-- verbose: 一个布尔值，是否打印出对象的特殊方法（如`__init__`）。
+- verbose: True或False，是否打印出对象的特殊方法（如`__init__`）。
+- maxlength：对象的最大输出长度上限。
+- ignore_funcs：若设为True，不输出对象的函数/方法。
 - file: 一个类似文件的对象，用于打印输出。
 
 **browse(object, verbose=False, name='obj')**:
 
-用图形界面浏览任意的Python对象，需要tkinter库。
+以GUI浏览任意Python对象，需tkinter库。
 
-- verbose: 与describe相同，是否打印出对象的特殊方法（如`__init__`）。
+- verbose: 与`describe()`相同，是否打印出对象的特殊方法（如`__init__`）。
 
-函数browse()的图形界面如下（中文的版本可在包目录内的[other/browser_chs_locale.py](https://github.com/ekcbw/pyobject/blob/main/pyobject/other/browser_chs_locale.py)中找到）：
+browse()的界面如下：
 
-![browse函数界面图片](https://i-blog.csdnimg.cn/blog_migrate/3d67b32633815a54c8c9d0c370248318.png)
+![browse()界面](https://i-blog.csdnimg.cn/direct/a4d513de3c234ef29b382c026b2bac20.png)
 
 **bases(obj, level=0, tab=4)**:
 
@@ -69,13 +71,13 @@ bases(obj) - 打印出对象的基类，以及继承顺序。
 
 ## 类: `pyobject.Code`
 
-类Code提供了Python字节码(bytecode)对象的封装，便于操作Python字节码。
+类Code提供了Python字节码(bytecode)对象的封装，用于操作Python字节码。
 
 Python内部的字节码对象`CodeType`，如`func.__code__`，是不可变的，这里的Code类提供了一个**可变**的字节码对象，以及一系列方法，使得操作底层字节码变得更容易。
 
 此外和Java字节码不同，Python字节码是**不跨版本**的，不同版本Python解释器的字节码互不兼容，
 
-而Code类提供了字节码的**通用接口**，支持**3.4至3.14**之间的所有Python版本（甚至PyPy的.pyc格式），简化了复杂的版本兼容性问题。
+而Code类提供了字节码的**通用接口**，支持**3.6至3.14**之间的所有Python版本（甚至PyPy的.pyc格式），简化了复杂的版本兼容性问题。
 
 #### 构造函数（`Code(code=None)`）
 `code`参数可以是现有的 `CodeType` 对象，或者另一个 `Code` 实例。如果未提供`code，则会创建一个默认的 `CodeType` 对象。
@@ -300,9 +302,9 @@ unused_var = func(temp_var)
 
 **getrealrefcount(obj)**:
 
-获取调用本函数前对象的实际引用计数。和sys.getrefcount()不同，不考虑调用时新增的引用计数。(差值为`_REFCNT_DELTA`这个常量)  
-如：getrealrefcount([])会返回0，因为退出getrealrefcount后列表[]不再被任何对象引用，而sys.getrefcount([])会返回1。  
-另外，a=[];getrealrefcount(a)会返回1而不是2。
+获取调用本函数前对象的实际引用计数。和`sys.getrefcount()`不同，不考虑调用时新增的引用计数。(差值为`_REFCNT_DELTA`这个常量)  
+如：`getrealrefcount([])`会返回0，由于`getrealrefcount()`的调用结束后`[]`不被任何对象引用，而`sys.getrefcount([])`会返回1。  
+另外，`a=[]; getrealrefcount(a)`会返回1而不是2。
 
 **setrefcount(obj, n)**:
 
@@ -310,7 +312,7 @@ unused_var = func(temp_var)
 
 **getrefcount_nogil(obj)**和**setrefcount_nogil(obj,ref_data)**:
 
-在Python 3.14+的无GIL版本中获取和设置引用计数，`ref_data`为`(ob_ref_local, ob_ref_shared)`，不考虑调用时新增的引用计数。(实验性)
+在Python 3.13+的无GIL版本中，获取和设置引用计数，`ref_data`为`(ob_ref_local, ob_ref_shared)`，不考虑调用时新增的引用计数。
 
 *警告: 不恰当地调用这些函数可能导致Python崩溃。*
 
@@ -320,10 +322,11 @@ unused_var = func(temp_var)
 本函数直接比较对象的指针，提高了效率。
 
 
-**`pyobject`当前版本**: 1.3.2
+**`pyobject`当前版本**: 1.3.3
 
 ## 更新日志:
 
+2026-1-4(v1.3.3):改进的3.14版本支持和`describe()`函数，调整最低支持Python版本为3.6。  
 2025-6-23(v1.3.2):为pyobject.objproxy模块新增了`use_exported_obj`参数，并进一步优化性能。  
 2025-6-6(v1.3.0):性能优化，提升了pyobject.objproxy模块的性能。  
 2025-4-30(v1.2.9):改进和增强了子模块pyobject.objproxy，重命名子模块pyobject.code_为pyobject.code。  

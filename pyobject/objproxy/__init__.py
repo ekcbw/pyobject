@@ -4,7 +4,7 @@ from pyobject.objproxy.optimize import optimize_code
 from pyobject.objproxy.utils import *
 
 try:from pyobject import get_type_flag
-except ImportError:get_type_flag=None
+except ImportError:get_type_flag = None
 try:from timer_tool import timer # pip install timer-tool
 except ImportError:timer=lambda func:func
 
@@ -26,6 +26,7 @@ def unproxy_obj(obj):
 class _EmptyTarget:
     def __bool__(self):return False
 EMPTY_OBJ = _EmptyTarget() # 空对象的特殊值
+
 class ReprFormatProxy:
     def __init__(self,target_obj,repr_func):
         self.target_obj = target_obj

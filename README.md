@@ -2,7 +2,7 @@
 <span class="badge-placeholder">[![GitHub release](https://img.shields.io/github/v/release/ekcbw/pyobject)](https://github.com/ekcbw/pyobject/releases/latest)</span>
 <span class="badge-placeholder">[![License: MIT](https://img.shields.io/github/license/ekcbw/pyobject)](https://github.com/ekcbw/pyobject/blob/main/LICENSE)</span>
 
-pyobject - A multifunctional all-in-one utility tool for managing internal Python objects, compatible with nearly all Python 3 versions.
+pyobject - A multifunctional all-in-one utility tool for managing internal Python objects, compatible with nearly all Python 3 versions and all platforms (Windows, Linux, macOS, etc.).
 
 [English | [中文](README_zh.md)]
 
@@ -309,18 +309,23 @@ This is the opposite of getrealrefcount() and also does not consider the additio
 
 In the GIL-free version of Python 3.13+, get and set reference counts, where `ref_data` is `(ob_ref_local, ob_ref_shared)`, without considering the reference counts added during the call.
 
-*Warning: Improper use of these functions above may lead to crashes.*
+*Warning: Improper use of these functions above may lead to crash of the intepreter.*
 
 **list_in(obj, lst)**:
 
 Determine whether obj is in the sequence lst.
-Compared to the built-in Python call "obj in lst" that invokes the "==" operator (`__eq__`) multiple times, this function directly compares the pointers to improve efficiency.
+Compared to the built-in Python call `obj in lst` that invokes the `==` operator (`__eq__()`) multiple times, this function directly compares the pointers to improve the performance.
+
+**get_string_intern_dict()**:
+
+Return the internal dictionary for interning strings (`sys.intern()`).
 
 
-**Current Version of `pyobject`**: 1.3.3
+**Current `pyobject` Version**: 1.3.4
 
 ## Change Log
 
+2026-1-22(v1.3.4): Added `get_string_intern_dict()` to `pyobject.pyobj_extension` module (available for 3.12+).  
 2026-1-4(v1.3.3): Improved the support for Python 3.14 and `describe()` function. Adjusted the minimum supported Python version to 3.6.  
 2025-6-23(v1.3.2): Added the `use_exported_obj` parameter to the pyobject.objproxy module and further optimized the performance.  
 2025-6-6(v1.3.0): Optimized the performance of the pyobject.objproxy module.  

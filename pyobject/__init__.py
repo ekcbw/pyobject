@@ -1,6 +1,5 @@
 """A multifunctional all-in-one utility tool for managing internal Python \
 objects, compatible with nearly all Python 3 versions.
-一个多功能合一的提供操作Python对象底层工具的Python包, 支持几乎所有Python 3版本。
 """
 import sys, types
 from warnings import warn
@@ -14,7 +13,7 @@ except ImportError: # 低于3.7的版本
                        MethodDescriptorType
     ClassMethodDescriptorType = type(dict.__dict__['fromkeys'])
 
-__version__="1.3.3"
+__version__="1.3.4"
 
 __all__=["objectname","bases","describe","desc"]
 _always_ignored_names=["__builtins__","__doc__"]
@@ -134,7 +133,7 @@ try:
                     "setrefcount","list_in","getrefcount_nogil","setrefcount_nogil",
                     "get_type_flag","set_type_flag","set_type_base","set_type_bases",
                     "set_type_mro","get_type_subclasses","set_type_subclasses",
-                    "set_type_subclasses_by_cls"])
+                    "set_type_subclasses_by_cls","get_string_intern_dict"])
 except ImportError:warn("Failed to import pyobject.pyobj_extension.")
 try:
     from pyobject.objproxy import ObjChain,ProxiedObj,unproxy_obj

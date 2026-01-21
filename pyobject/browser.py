@@ -1,4 +1,4 @@
-"以图形方式浏览Python对象的模块。A module providing a visual interface to browse Python objects."
+"A module providing a visual interface to browse Python objects."
 import sys,os,types,ctypes
 import tkinter as tk
 import tkinter.ttk as ttk

@@ -1,48 +1,41 @@
-﻿#include <Python.h>
-#include <stdint.h>
+﻿#include <stdint.h>
+#include <Python.h>
 
-PyDoc_STRVAR(convptr_doc, u8"convptr(pointer)"
+PyDoc_STRVAR(convptr_doc, u8"convptr(pointer) -> object"
     u8"\n"
     u8"Convert a integer pointer to a Python object, as a reverse of id()."
-    u8"将整数指针转换为Python对象，与id()相反。\n"
     u8"Warning:Converting an invalid pointer may lead to crashes.");
 PyDoc_STRVAR(py_inc_doc, u8"py_incref(obj)"
     u8"\n"
     u8"Increase the reference count of an object."
-    u8"将对象的引用计数增加1。\n"
     u8"Warning:Improper use of this function may lead to crashes.");
 PyDoc_STRVAR(py_dec_doc, u8"py_decref(obj)"
     u8"\n"
     u8"Decrease the reference count of an object."
-    u8"将对象的引用计数减小1。\n"
     u8"Warning:Improper use of this function may lead to crashes.");
-PyDoc_STRVAR(getrealref_doc, u8"getrealrefcount(obj)"
+PyDoc_STRVAR(getrealref_doc, u8"getrealrefcount(obj) -> int"
     u8"\n"
     u8"Get the actual reference count of an object before calling getrealrefcount(). Unlike "
-    u8"sys.getrefcount(), this function ignores the reference count increase when called.\n"
-    u8"获取调用本函数前对象的实际引用计数。和sys.getrefcount()不同，不考虑调用时新增的引用计数。");
-PyDoc_STRVAR(setref_doc, u8"setrefcount(obj, n)"
+    u8"sys.getrefcount(), this function ignores the reference count increase when called.\n");
+PyDoc_STRVAR(setref_doc, u8"setrefcount(obj, n: int)"
     u8"\n"
     u8"Set the actual reference count of an object before calling setrefcount() to n, "
     u8"as a reverse of getrealrefcount(), ignoring the reference count increase when called.\n"
-    u8"设置对象的实际引用计数(调用函数前)为n，和getrealrefcount()相反，不考虑调用时新增的引用计数。\n"
-    u8"Warning:Improper use of this function may lead to crashes.");
+    u8"Warning: Improper use of this function may lead to crashes.");
 PyDoc_STRVAR(list_in_doc, u8"list_in(obj, lst)"
     u8"\n"
-    u8"判断obj是否在列表或元组lst中。\n与Python内置的obj in lst调用多次\"==\"运算符(__eq__)相比，"
-    u8"本函数直接比较对象的指针，提高了效率。\n"
     u8"Determine whether `obj` is in the sequence `lst`.\nCompared to the built-in "
     u8"Python call `obj in lst` that invokes the `==` operator (__eq__) multiple times, "
     u8"this function directly compares the pointers to improve efficiency.");
-PyDoc_STRVAR(getrefcount_nogil_doc, u8"getrefcount_nogil(obj)\n"
-    u8"获取Python 3.14+ 无GIL版本的引用计数，返回一个元组，分别是(ob_ref_local, ob_ref_shared)，不考虑调用时新增的引用计数。\n"
-    u8"Get the reference counts in GIL-free versions of Python 3.14+, returning a tuple of "
+PyDoc_STRVAR(getrefcount_nogil_doc, u8"getrefcount_nogil(obj) -> tuple[int, int]\n"
+    u8"Get the reference counts in GIL-free versions of Python 3.13+, returning a tuple of "
     u8"(ob_ref_local, ob_ref_shared), ignoring the reference count increase when called.");
-PyDoc_STRVAR(setrefcount_nogil_doc, u8"setrefcount_nogil(obj,ref_data)\n"
-    u8"设置Python 3.14+ 无GIL版本的引用计数，ref_data为(ob_ref_local, ob_ref_shared)的元组，不考虑调用时新增的引用计数。\n"
-    u8"Set the reference counts in GIL-free versions of Python 3.14+, with ref_data being a tuple of "
+PyDoc_STRVAR(setrefcount_nogil_doc, u8"setrefcount_nogil(obj, ref_data: tuple[int, int])\n"
+    u8"Set the reference counts in GIL-free versions of Python 3.13+, with ref_data being a tuple of "
     u8"(ob_ref_local, ob_ref_shared), ignoring the reference count increase when called.\n"
-    u8"Warning:Improper use of this function may lead to crashes.");
+    u8"Warning: Improper use of this function may lead to crashes.");
+PyDoc_STRVAR(get_string_intern_doc, u8"get_string_intern_dict() -> dict[str, str]\n"
+    u8"Return the internal dictionary for interning strings (sys.intern()).");
 
 #if PY_MAJOR_VERSION < 3
 #error "Python 3 is required"
@@ -217,7 +210,7 @@ PyObject *list_in(PyObject *self, PyObject *args, PyObject *kwargs) {
     Py_RETURN_FALSE;
 }
 PyObject *_list_setnull(PyObject *self, PyObject *args) {
-    PyObject *list;Py_ssize_t index;
+    PyObject *list; Py_ssize_t index;
     if (!PyArg_ParseTuple(args, "On", &list, &index)) return NULL;
     if (!PyList_Check(list)) {
         PyErr_SetString(PyExc_TypeError, "expected a list");
@@ -289,10 +282,22 @@ static PyObject* set_type_mro(PyObject *self, PyObject *args, PyObject *kwargs) 
     Py_RETURN_NONE;
 }
 
+static PyObject* get_string_intern_dict(PyObject *self, PyObject *args) {
+    #ifndef _Py_INTERP_CACHED_OBJECT
+    PyErr_SetString(PyExc_NotImplementedError, "CPython 3.12+ is required");
+    return NULL;
+    #else
+    PyInterpreterState *interp = _PyInterpreterState_GET();
+    PyObject *result = _Py_INTERP_CACHED_OBJECT(interp, interned_strings);
+    Py_INCREF(result);
+    return result;
+    #endif
+}
+
 #ifdef _PY312
 #define managed_static_type_state static_builtin_state /* 兼容3.12 */
 #endif
-PyObject **_lookup_tp_subclasses(PyTypeObject *self){ // 从解释器的实现typeobject.c复制
+PyObject **_lookup_tp_subclasses(PyTypeObject *self){ // 来自解释器的实现typeobject.c
     #ifdef _PY312PLUS
     if (self->tp_flags & _Py_TPFLAGS_STATIC_BUILTIN) {
         PyInterpreterState *interp = _PyInterpreterState_GET();
@@ -412,6 +417,7 @@ static PyMethodDef pyobj_extension_functions[] = {
     {"set_type_subclasses", (PyCFunction)set_type_subclasses, METH_VARARGS | METH_KEYWORDS, "set_type_subclasses(typeobj: type, subclasses: dict)"},
     {"set_type_subclasses_by_cls", (PyCFunction)set_type_subclasses_by_cls, METH_VARARGS | METH_KEYWORDS,
      "set_type_subclasses_by_cls(typeobj: type, cls: type)"},
+    {"get_string_intern_dict", (PyCFunction)get_string_intern_dict, METH_NOARGS, get_string_intern_doc},
     { NULL, NULL, 0, NULL } /* marks end of array */
 };
 
@@ -429,7 +435,7 @@ int exec_pyobj_extension(PyObject *module) {
 }
 
 /* Documentation for pyobj_extension. */
-PyDoc_STRVAR(pyobj_extension_doc, u8"模块 pyobj_extension - pyobject库的C扩展模块, 提供一系列操作Python对象底层的函数。");
+PyDoc_STRVAR(pyobj_extension_doc, u8"Provide the functions for manipulating underlying Python objects.");
 
 static PyModuleDef_Slot pyobj_extension_slots[] = {
     {Py_mod_exec, exec_pyobj_extension},

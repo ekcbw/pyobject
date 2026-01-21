@@ -1,4 +1,4 @@
-pyobject - 一个多功能合一的提供操作Python对象底层工具的Python包, 支持几乎所有Python 3版本。
+pyobject - 一个多功能合一的提供操作Python对象底层工具的Python包, 支持几乎所有Python 3版本和平台（Windows、Linux、macOS等）。
 
 [[English](README.md) | 中文]
 
@@ -314,18 +314,23 @@ unused_var = func(temp_var)
 
 在Python 3.13+的无GIL版本中，获取和设置引用计数，`ref_data`为`(ob_ref_local, ob_ref_shared)`，不考虑调用时新增的引用计数。
 
-*警告: 不恰当地调用这些函数可能导致Python崩溃。*
+*警告: 不当地调用这些函数可能导致解释器崩溃。*
 
 **list_in(obj, lst)**:
 
-判断obj是否在列表或元组lst中。与Python内置的obj in lst调用多次==运算符(`__eq__`)相比，
-本函数直接比较对象的指针，提高了效率。
+判断obj是否在列表或元组lst中。与Python内置的`obj in lst`多次调用`==`运算符(`__eq__()`)相比，
+本函数直接比较对象的指针，提升性能。
+
+**get_string_intern_dict()**:
+
+返回字符串驻留（`sys.intern()`）使用的内部字典。
 
 
-**`pyobject`当前版本**: 1.3.3
+**当前`pyobject`版本**: 1.3.4
 
 ## 更新日志:
 
+2026-1-22(v1.3.4):向`pyobject.pyobj_extension`模块加入了`get_string_intern_dict()`函数（3.12+可用）。
 2026-1-4(v1.3.3):改进的3.14版本支持和`describe()`函数，调整最低支持Python版本为3.6。  
 2025-6-23(v1.3.2):为pyobject.objproxy模块新增了`use_exported_obj`参数，并进一步优化性能。  
 2025-6-6(v1.3.0):性能优化，提升了pyobject.objproxy模块的性能。  

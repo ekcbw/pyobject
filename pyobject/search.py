@@ -1,4 +1,4 @@
-"提供查找、搜索python对象的函数的模块。Implements the utility for locating the path to a specific object."
+"Implements the utility for locating the path to a specific object."
 import traceback,builtins,sys
 from warnings import warn
 try:

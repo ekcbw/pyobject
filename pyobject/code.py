@@ -1,4 +1,4 @@
-"""操作Python字节码的工具。Tools for manipulating Python native bytecode.
+"""Tools for manipulating Python native bytecode.
 For the documentation, please refer to https://github.com/ekcbw/pyobject ."""
 import sys
 try:

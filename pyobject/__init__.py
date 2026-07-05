@@ -11,9 +11,9 @@ try:
 except ImportError: # 低于3.7的版本
     from typing import WrapperDescriptorType,MethodWrapperType,\
                        MethodDescriptorType
-    ClassMethodDescriptorType = type(dict.__dict__['fromkeys'])
+    ClassMethodDescriptorType = type(dict.__dict__["fromkeys"])
 
-__version__="1.3.5.1"
+__version__="1.3.5.2"
 
 __all__=["objectname","bases","describe","desc"]
 _always_ignored_names=["__builtins__"]
@@ -112,7 +112,7 @@ file: A file-like object for printing output.
             print("\n"+' '*tab*(level+1),end='',file=file)
             print("Dictionary items of the object:",file=file)
             for key in obj.keys():
-                print(' '*tab*(level+1)+"[%s]: "%repr(key),end='',file=file)
+                print(' '*tab*(level+1)+"[%s]: "%repr(key),end='',file=file) # %s：key可能是元组
                 try:
                     describe(obj[key],level+1,maxlevel,tab,verbose,file,maxlength)
                 except KeyError:

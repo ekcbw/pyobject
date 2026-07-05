@@ -7,7 +7,7 @@ except ImportError:
     from importlib._bootstrap import MAGIC_NUMBER
 from types import CodeType, FunctionType
 from collections import OrderedDict
-import marshal,io,builtins
+import marshal,builtins
 import dis
 import pickle
 import traceback
@@ -173,7 +173,7 @@ The code argument can be either Code or the built-in CodeType."""
     def __dir__(self):
         extra=[attr for attr in dir(self._code) \
             if attr not in self._args and not attr.startswith("__")] # self._code的其他属性
-        return object.__dir__(self) + list(self._args.keys()) + extra
+        return list(object.__dir__(self)) + list(self._args.keys()) + extra
     # 用于pickle模块保存状态
     def __getstate__(self):
         return self._args
@@ -299,7 +299,7 @@ def interactive(mode='exec'):
 if __name__=="__main__":
     if len(sys.argv)>1:
             ps='>>> '
-            statement='c=Code.from_file(%s)'%repr(sys.argv[1].strip('"'))
+            statement='c = Code.from_file(%r)'%sys.argv[1].strip('"')
             print(ps + statement)
             try:exec(statement)
             except Exception:traceback.print_exc()

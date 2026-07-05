@@ -133,7 +133,7 @@ Attributes introduced in Python 3.8 and later:
 - `show(*args, **kw)`: Internally calls `pyobject.desc` to display the attributes of the code object. The parameters are the same as those used in `desc()`.
 - `info()`: Internally calls `dis.show_code` to display basic information about the bytecode.
 - `dis(*args, **kw)`: Calls the `dis` module to output the disassembly of the bytecode, equivalent to `dis.dis(c.to_code())`.
-- `decompile(version=None, *args, **kw)`: Calls the `uncompyle6` library to decompile the code object into source code. (The `uncompyle6` library is optional when installing the `pyobject` package.)
+- `decompile(version=None, *args, **kw)`: Decompile the code object into source code. (deprecated)
 
 **Factory Functions**
 
@@ -321,11 +321,11 @@ Compared to the built-in Python call `obj in lst` that invokes the `==` operator
 Return the internal dictionary for interning strings (`sys.intern()`).
 
 
-**Current `pyobject` Version**: 1.3.5.1
+**Current `pyobject` Version**: 1.3.5.2
 
 ## Change Log
 
-2026-7-5(v1.3.5): Added `FrameLocalsProxy` support for Python 3.13+ and high DPI support for non-Windows platforms.  
+2026-7-5(v1.3.5): Added `FrameLocalsProxy` support for Python 3.13+ and high DPI support for non-Windows platforms. Improved the algorithm for `pyobject.search`.  
 2026-1-22(v1.3.4): Added `get_string_intern_dict()` to `pyobject.pyobj_extension` module (available for 3.12+).  
 2026-1-4(v1.3.3): Improved the support for Python 3.14 and `describe()` function. Adjusted the minimum supported Python version to 3.6.  
 2025-6-23(v1.3.2): Added the `use_exported_obj` parameter to the pyobject.objproxy module and further optimized the performance.  

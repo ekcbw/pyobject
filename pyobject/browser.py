@@ -11,7 +11,7 @@ try:
 except ImportError: # 低于3.7的版本
     from typing import WrapperDescriptorType,MethodWrapperType,\
                        MethodDescriptorType
-    ClassMethodDescriptorType = type(dict.__dict__['fromkeys'])
+    ClassMethodDescriptorType = type(dict.__dict__["fromkeys"])
 
 try:from pyobject import objectname,shortrepr,isfunc
 except ImportError:
@@ -178,7 +178,7 @@ class ObjectBrowser():
             for item in self.tvw.get_children(root):
                 self.tvw.delete(item)
     def _get_image(self,obj):
-        if isinstance(obj,int) or isinstance(obj,float):
+        if isinstance(obj,(int,float)):
             return self.num_image
         elif isinstance(obj,str):
             return self.str_image

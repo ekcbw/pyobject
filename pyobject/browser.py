@@ -24,21 +24,17 @@ SKIP=(WrapperDescriptorType, MethodWrapperType,\
 TYPE_EXTRA_ATTRS = ("__basicsize__","__dictoffset__","__flags__",
     "__itemsize__","__weakrefoffset__")
 TYPE_EXTRA_CLASS_ATTRS = ("__base__","__bases__","__mro__")
+DICT_TYPES = [dict, types.MappingProxyType]
+if sys.version_info >= (3, 13): # 3.13+
+    FrameLocalsProxy = type((lambda:sys._getframe())().f_locals)
+    DICT_TYPES.append(FrameLocalsProxy)
 
 def isdict(obj):
     # 判断对象是否为字典
-    dict_types=[dict,types.MappingProxyType]
-    for type in dict_types:
-        if isinstance(obj,type):return True
+    for type in DICT_TYPES:
+        if isinstance(obj,type):
+            return True
     return False
-
-def get_dpi_scale():
-    # 获取Windows的当前DPI，仅Windows
-    hdc = ctypes.windll.user32.GetDC(0)
-    dpi_x = ctypes.windll.gdi32.GetDeviceCaps(hdc, 88)  # 88: LOGPIXELSX
-    dpi_y = ctypes.windll.gdi32.GetDeviceCaps(hdc, 90)  # 90: LOGPIXELSY
-    ctypes.windll.user32.ReleaseDC(0, hdc)
-    return dpi_x/96, dpi_y/96
 
 class ScrolledTreeview(ttk.Treeview):
     "A scrollable Treeview widget inherited from ttk.Treeview."
@@ -62,9 +58,10 @@ class ScrolledTreeview(ttk.Treeview):
         self.frame.place(*args,**options)
 
 class ObjectBrowser():
-    title="Python Object Browser"
-    MAX_VIEW_LEN=512 # 避免引发性能问题
-    MAX_EDITVALUE_LEN=3072
+    title = "Python Object Browser"
+    MAX_VIEW_LEN = 512 # 避免引发性能问题
+    MAX_EDITVALUE_LEN = 3072
+    WIDTH, HEIGHT = 480, 400
     def __init__(self,master,obj,verbose=False,name="obj",
                  multi_window=False,refresh_history=True,
                  root_obj=None,rootobj_name=None):
@@ -77,8 +74,11 @@ class ObjectBrowser():
         self.rootobj_name = rootobj_name or name
         self.history=[(obj,name)] # 单窗口浏览的历史记录，由多个(对象，路径)的元组组成
         self.history_index=0
+        self.ui_scale = self.master.winfo_fpixels('1i') / 96
 
         self.master.title(self.title)
+        self.master.geometry("%dx%d" % (self.WIDTH*self.ui_scale,
+                                        self.HEIGHT*self.ui_scale))
         try:
             self.master.iconbitmap(os.path.join(_IMAGE_PATH,"python.ico"))
         except tk.TclError:pass
@@ -99,8 +99,7 @@ class ObjectBrowser():
         self.tvw=ScrolledTreeview(self.master,column='.',selectmode=tk.EXTENDED)
         self.tvw.heading("#0",text="Attribute/Index/Key")
         self.tvw.heading("#1",text="Value")
-        self.tvw.column("#0", stretch = 0, # 不跟随窗口大小的变化拉伸
-                        width = int(160*(get_dpi_scale()[0] if sys.platform == "win32" else 1)))
+        self.tvw.column("#0", stretch=0, width=int(160*self.ui_scale)) # 不跟随窗口大小的变化拉伸
         self.tvw.column("#1", stretch=1)
         self.tvw.bind("<<TreeviewSelect>>",self.on_select)
         self.tvw.bind("<Double-Button-1>",self.on_open)
@@ -108,7 +107,7 @@ class ObjectBrowser():
         self.tvw.bind("<Key-Delete>",self.del_item)
         self.tvw.tag_configure("error",foreground="red") # 经测试, Python 3.7-3.9中无法显示颜色效果(bug?)
         self.tvw.tag_configure("gray",foreground="gray")
-        self.master.bind("<F5>",self.navigate_history) #refresh)
+        self.master.bind("<F5>",self.navigate_history)
 
         self.functions_tag=self.tvw.insert('',index=0,text="Functions/Methods")
         self.attributes_tag=self.tvw.insert('',index=1,text="Attributes")
@@ -119,9 +118,8 @@ class ObjectBrowser():
         self.tvw.item(self.classes_tag,open=True)
         self.tvw.item(self.lst_tag,open=True)
         self.tvw.item(self.dict_tag,open=True)
-        if sys.platform == "win32": # 高dpi支持
-            style = ttk.Style(self.master)
-            style.configure("Treeview", rowheight=int(20*get_dpi_scale()[1]))
+        style = ttk.Style(self.master) # 高dpi支持
+        style.configure("Treeview", rowheight=int(20*self.ui_scale))
 
         editor = ttk.Labelframe(self.master, text='Edit value',
                                 width=100, height=100)
@@ -452,11 +450,6 @@ attributes when navigating backward or forward. If True, editing attributes \
 and then navigating will show changes in the object; otherwise, it will not.
 root_obj and rootobj_name: Specify the root object and its name (for internal use)."""
     root=tk.Tk()
-    if sys.platform == "win32": # 高dpi支持
-        dpi_x,dpi_y = get_dpi_scale()
-    else:dpi_x = dpi_y = 1
-    width, height = 480,400
-    root.geometry("%dx%d" % (width*dpi_x,height*dpi_y))
     ObjectBrowser(root,object,verbose,name,multi_window=multi_window,
                   refresh_history=refresh_history,root_obj=root_obj,
                   rootobj_name=rootobj_name)

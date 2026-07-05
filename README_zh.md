@@ -326,11 +326,12 @@ unused_var = func(temp_var)
 返回字符串驻留（`sys.intern()`）使用的内部字典。
 
 
-**当前`pyobject`版本**: 1.3.4
+**当前`pyobject`版本**: 1.3.5
 
 ## 更新日志:
 
-2026-1-22(v1.3.4):向`pyobject.pyobj_extension`模块加入了`get_string_intern_dict()`函数（3.12+可用）。
+2026-7-5(v1.3.5):增加了3.13+的`FrameLocalsProxy`的支持，和非windows平台的高dpi支持。  
+2026-1-22(v1.3.4):向`pyobject.pyobj_extension`模块加入了`get_string_intern_dict()`函数（3.12+可用）。  
 2026-1-4(v1.3.3):改进的3.14版本支持和`describe()`函数，调整最低支持Python版本为3.6。  
 2025-6-23(v1.3.2):为pyobject.objproxy模块新增了`use_exported_obj`参数，并进一步优化性能。  
 2025-6-6(v1.3.0):性能优化，提升了pyobject.objproxy模块的性能。  

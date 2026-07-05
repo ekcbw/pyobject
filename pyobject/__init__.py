@@ -13,7 +13,7 @@ except ImportError: # 低于3.7的版本
                        MethodDescriptorType
     ClassMethodDescriptorType = type(dict.__dict__['fromkeys'])
 
-__version__="1.3.4"
+__version__="1.3.5"
 
 __all__=["objectname","bases","describe","desc"]
 _always_ignored_names=["__builtins__","__doc__"]

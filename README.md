@@ -321,10 +321,11 @@ Compared to the built-in Python call `obj in lst` that invokes the `==` operator
 Return the internal dictionary for interning strings (`sys.intern()`).
 
 
-**Current `pyobject` Version**: 1.3.4
+**Current `pyobject` Version**: 1.3.5
 
 ## Change Log
 
+2026-7-5(v1.3.5): Added `FrameLocalsProxy` support for Python 3.13+ and high DPI support for non-Windows platforms.  
 2026-1-22(v1.3.4): Added `get_string_intern_dict()` to `pyobject.pyobj_extension` module (available for 3.12+).  
 2026-1-4(v1.3.3): Improved the support for Python 3.14 and `describe()` function. Adjusted the minimum supported Python version to 3.6.  
 2025-6-23(v1.3.2): Added the `use_exported_obj` parameter to the pyobject.objproxy module and further optimized the performance.  

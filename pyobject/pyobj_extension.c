@@ -78,8 +78,10 @@ PyDoc_STRVAR(get_string_intern_doc, u8"get_string_intern_dict() -> dict[str, str
 
 #ifdef _PY312PLUS
 #define Py_BUILD_CORE
+#define Py_BUILD_CORE_MODULE
 #include <internal/pycore_object.h>        // _PyType_HasFeature()
 #include <internal/pycore_typeobject.h>    // struct type_cache
+#undef Py_BUILD_CORE_MODULE
 #undef Py_BUILD_CORE
 #endif
 

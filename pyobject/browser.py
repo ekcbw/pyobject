@@ -62,7 +62,7 @@ class ObjectBrowser():
     MAX_VIEW_LEN = 512 # 避免引发性能问题
     MAX_EDITVALUE_LEN = 3072
     WIDTH, HEIGHT = 480, 400
-    def __init__(self,master,obj,verbose=False,name="obj",
+    def __init__(self,master,obj,verbose=False,name="root_obj",
                  multi_window=False,refresh_history=True,
                  root_obj=None,rootobj_name=None):
         self.master=master
@@ -304,7 +304,7 @@ class ObjectBrowser():
         else:
             parent=self.tvw.parent(selection[0])
             if parent:
-                #value_str=self.tvw.item(selection[0])["values"][0] # 现已弃用，由于使用了shortrepr()
+                #value_str=self.tvw.item(selection[0])["values"][0]
                 attr=self.tvw.item(selection)["text"]
                 if parent==self.dict_tag:
                     value_str=repr(self.obj[eval(attr)])
@@ -377,7 +377,7 @@ class ObjectBrowser():
             self.obj[int(attr)]=value
         else:
             setattr(self.obj,attr,value)
-        self.tvw.item(selected,values=(repr(value),),
+        self.tvw.item(selected,values=(shortrepr(value,self.MAX_VIEW_LEN),),
                       image=self._get_image(value))
     def new_item(self):
         if not self.tvw.selection():return
@@ -434,7 +434,7 @@ class ObjectBrowser():
             self.history_index+=1
             self.navigate_history()
 
-def browse(object,verbose=True,name="obj",
+def browse(object,verbose=True,name="root_obj",
            mainloop=True,multi_window=False,refresh_history=True,
            root_obj=None,rootobj_name=None):
     """Browse a Python object through a graphical interface.
@@ -458,16 +458,17 @@ root_obj and rootobj_name: Specify the root object and its name (for internal us
 def test():
     if sys.platform == 'win32': # Windows下的高DPI支持
         ctypes.OleDLL('shcore').SetProcessDpiAwareness(1)
+
     class Test:
         def __init__(self):
-            self.a='foo';self._cnt=0
+            self.a='foo';self._view_cnt=0
             self.list=["foo","bar",1]
             self.tuple=("foo","bar",2)
             self.dict={"a":"bar","b":1}
         @property
-        def cnt(self):
-            self._cnt+=1
-            return self._cnt
+        def view_cnt(self):
+            self._view_cnt+=1
+            return self._view_cnt
 
     browse(Test(),verbose=True)
 

@@ -13,12 +13,14 @@ except ImportError: # 低于3.7的版本
                        MethodDescriptorType
     ClassMethodDescriptorType = type(dict.__dict__['fromkeys'])
 
-__version__="1.3.5"
+__version__="1.3.5.1"
 
 __all__=["objectname","bases","describe","desc"]
-_always_ignored_names=["__builtins__","__doc__"]
+_always_ignored_names=["__builtins__"]
 
-MAXLENGTH=150
+BASIC_TYPES = (int, float, str, bytes, bytearray,
+               list, tuple, dict, set)
+MAXLENGTH = 150
 
 def isfunc(obj):
     # 判断一个对象是否为函数或方法
@@ -76,36 +78,41 @@ file: A file-like object for printing output.
         if result.startswith('[') or result.startswith('{'):pprint(result)
         else:print(result,file=file)
     elif level>maxlevel:
-        raise ValueError("Argument level is larger than maxlevel")
+        raise ValueError("level is larger than maxlevel")
     else:
         print(shortrepr(obj,maxlength)+': ',file=file)
-        if type(obj) is type:
+        if isinstance(obj, type):
+            print(' '*tab*(level+1),end='',file=file)
             print("Base classes of the object:",file=file)
             bases(obj,level+1,tab)
             print(file=file)
-        for attr in dir(obj):
-            if verbose or not attr.startswith("_"):
-                print(' '*tab*(level+1),end='',file=file)
-                try:
-                    value = getattr(obj,attr)
+        if verbose or type(obj) not in BASIC_TYPES or level == 0: # 基本类型（不包括子类）不在第一层时不展示属性
+            for attr in dir(obj):
+                if verbose or not attr.startswith("_"):
+                    print(' '*tab*(level+1),end='',file=file)
+                    try:
+                        value = getattr(obj,attr)
+                    except AttributeError:
+                        print(attr+": <AttributeError!>",file=file)
+                        continue
                     if ignore_funcs and isfunc(value):
                         continue
-                    print(f"{attr}: ",file=file)
+                    print(attr+": ",end='',file=file)
                     if attr in _always_ignored_names:
                         describe(value,level+1,maxlevel,tab,verbose,file,maxlength)
                     else:
                         print(shortrepr(value,maxlength),file=file)
-                except AttributeError:
-                    print(f"{attr}: <AttributeError!>",file=file)
         if isinstance(obj, list):
-            print("\nList items of the object:",file=file)
+            print("\n"+' '*tab*(level+1),end='',file=file)
+            print("List items of the object:",file=file)
             for i,item in enumerate(obj):
-                print(f"{' '*tab*(level+1)}{i}: ",end='',file=file)
+                print(' '*tab*(level+1)+"[%d]: "%i,end='',file=file)
                 describe(item,level+1,maxlevel,tab,verbose,file,maxlength)
         if isinstance(obj, dict):
-            print("\nDictionary items of the object:",file=file)
+            print("\n"+' '*tab*(level+1),end='',file=file)
+            print("Dictionary items of the object:",file=file)
             for key in obj.keys():
-                print(f"{' '*tab*(level+1)}{key!r}: ",end='',file=file)
+                print(' '*tab*(level+1)+"[%s]: "%repr(key),end='',file=file)
                 try:
                     describe(obj[key],level+1,maxlevel,tab,verbose,file,maxlength)
                 except KeyError:
@@ -117,16 +124,16 @@ desc = describe #别名
 try:
     from pyobject.browser import browse
     __all__.append("browse")
-except ImportError:warn("Failed to import module pyobject.browser.")
+except Exception:warn("Failed to import module pyobject.browser.")
 try:
     from pyobject.search import make_list,make_iter,search
     __all__.extend(["make_list","make_iter","search"])
-except ImportError:warn("Failed to import pyobject.search.")
+except Exception:warn("Failed to import pyobject.search.")
 
 try:
     from pyobject.code import Code
     __all__.append("Code")
-except ImportError:warn("Failed to import pyobject.code.")
+except Exception:warn("Failed to import pyobject.code.")
 try:
     from pyobject.pyobj_extension import *
     __all__.extend(["convptr","py_incref","py_decref","getrealrefcount",
@@ -134,11 +141,11 @@ try:
                     "get_type_flag","set_type_flag","set_type_base","set_type_bases",
                     "set_type_mro","get_type_subclasses","set_type_subclasses",
                     "set_type_subclasses_by_cls","get_string_intern_dict"])
-except ImportError:warn("Failed to import pyobject.pyobj_extension.")
+except Exception:warn("Failed to import pyobject.pyobj_extension.")
 try:
     from pyobject.objproxy import ObjChain,ProxiedObj,unproxy_obj
     __all__.extend(["ObjChain","ProxiedObj","unproxy_obj"])
-except ImportError as err:
+except Exception as err:
     warn("Failed to import pyobject.objproxy (%s): %s"%(type(err).__name__,err))
 
 if __name__=="__main__":

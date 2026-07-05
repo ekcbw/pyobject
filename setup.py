@@ -32,13 +32,13 @@ setup(
     author="ekcbw",
     author_email="u81430728@163.com",
     url="https://github.com/ekcbw/pyobject",
-    packages=['pyobject'],
+    packages=['pyobject', 'pyobject.images', 'pyobject.objproxy', 'pyobject.tests'],
     include_package_data=True,
     ext_modules=[Extension(
         "pyobject.pyobj_extension",["pyobject/pyobj_extension.c"]
     )],
     keywords=["pyobject","python","object","utility","object browser",
-        "bytecode","reflect","object search","OOP","reverse","对象","字节码","逆向"
+        "bytecode","reflect","object search","OOP","reverse"
     ],
     classifiers=[
         'Programming Language :: Python',

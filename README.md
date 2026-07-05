@@ -321,7 +321,7 @@ Compared to the built-in Python call `obj in lst` that invokes the `==` operator
 Return the internal dictionary for interning strings (`sys.intern()`).
 
 
-**Current `pyobject` Version**: 1.3.5
+**Current `pyobject` Version**: 1.3.5.1
 
 ## Change Log
 

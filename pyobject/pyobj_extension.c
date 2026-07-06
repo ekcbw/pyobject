@@ -350,7 +350,7 @@ static PyObject* set_type_subclasses_by_cls(PyObject *self, PyObject *args, PyOb
     PyTypeObject *dst = (PyTypeObject *)typeobj, *src = (PyTypeObject *)cls;
     #ifndef _PY312
     if(getSubclasses(src)) Py_INCREF(getSubclasses(src));
-    if(getSubclasses(dst)) Py_DECREF(getSubclasses(src));
+    if(getSubclasses(dst)) Py_DECREF(getSubclasses(dst));
     #endif
     getSubclasses(dst) = getSubclasses(src);
     Py_RETURN_NONE;

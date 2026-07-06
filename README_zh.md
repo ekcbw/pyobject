@@ -245,7 +245,7 @@ plt.show()
 
 #### 详细用法
 
-**`ObjChain`**  
+**ObjChain**  
 - `ObjChain(export_funcs = None, export_attrs = None)`: 创建一个`ObjChain`对象，`export_funcs`为全局范围需要导出的函数列表，`export_attrs`为全局范围需要导出的属性列表。由于是全局范围，对所有变量有效。
 - `new_object(code_line,name, export_funcs=None, export_attrs=None, use_target_obj=True, use_exported_obj=True)`: 新增一个对象，返回一个生成的`ProxiedObj`类型的代理对象，返回值可以直接当作普通对象使用。  
 `code_line`: 为了得到这个对象而需要执行的代码（如`"import numpy as np"`），`name`是执行之后对象放在的变量值（如`"np"`）。  
@@ -261,7 +261,7 @@ plt.show()
 如果`remove_internal`为`False`，调用`plt.plot(arr,arr2)`本身时生成的访问`arr`, `arr2`的内部代码，如`var13 = arr.ndim`不会被移除。  
 `remove_export_type`: 是否移除无用的类型导出，如`str(var)`。  
 
-**`ProxiedObj`**  
+**ProxiedObj**  
 
 `ProxiedObj`为`ObjChain`的`new_object()`、`add_existing_obj()`返回的代理对象的类型，可以替代任何普通对象使用，但通常不建议直接使用`ProxiedObj`类本身的方法和属性。  
 

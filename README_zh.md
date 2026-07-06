@@ -330,7 +330,7 @@ unused_var = func(temp_var)
 返回字符串驻留（`sys.intern()`）使用的内部字典。
 
 
-**当前`pyobject`版本**: 1.3.5.2
+**当前`pyobject`版本**: 1.3.5.3
 
 ## 更新日志:
 

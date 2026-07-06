@@ -19,8 +19,8 @@ except ImportError:
 
 
 _IMAGE_PATH=os.path.join(os.path.split(__file__)[0],"images")
-SKIP=(WrapperDescriptorType, MethodWrapperType,\
-     MethodDescriptorType, ClassMethodDescriptorType)
+SKIP=(WrapperDescriptorType, MethodWrapperType,
+      MethodDescriptorType, ClassMethodDescriptorType)
 TYPE_EXTRA_ATTRS = ("__basicsize__","__dictoffset__","__flags__",
     "__itemsize__","__weakrefoffset__")
 TYPE_EXTRA_CLASS_ATTRS = ("__base__","__bases__","__mro__")
@@ -28,13 +28,11 @@ DICT_TYPES = [dict, types.MappingProxyType]
 if sys.version_info >= (3, 13): # 3.13+
     FrameLocalsProxy = type((lambda:sys._getframe())().f_locals)
     DICT_TYPES.append(FrameLocalsProxy)
+DICT_TYPES = tuple(DICT_TYPES)
 
 def isdict(obj):
     # 判断对象是否为字典
-    for type in DICT_TYPES:
-        if isinstance(obj,type):
-            return True
-    return False
+    return isinstance(obj, DICT_TYPES)
 
 class ScrolledTreeview(ttk.Treeview):
     "A scrollable Treeview widget inherited from ttk.Treeview."

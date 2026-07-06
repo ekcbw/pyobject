@@ -48,16 +48,16 @@ Prints base classes and the inheritance order of an object.
 
 ## Functions for searching objects:
 
-**make_list(start_obj, recursions=2, all=False)**:
+**make_iter(start_obj, recursions=2, all=False)**:
 
-Creates a list of objects without duplicates.
+Creates an iterator of objects without duplicates.
 - start: The object to start searching from.
 - recursion: Number of recursions.
 - all: Whether to include special attributes (e.g., `__init__`) in the list.
 
-**make_iter(start_obj, recursions=2, all=False)**:
+**make_list(start_obj, recursions=2, all=False)**:
 
-Similar to make_list, but creates an iterator, which may contain duplicates.
+Similar to `make_iter`, but creates an list.
 
 **search(obj, start, recursions=3, search_str=False)**:
 
@@ -148,23 +148,27 @@ Example usage: (excerpted from the doctest):
 
 ```python
 >>> def f():print("Hello")
+...
 >>> c=Code.fromfunc(f) # or c=Code(f.__code__)
->>> c.co_consts
-(None, 'Hello')
->>> c.co_consts=(None, 'Hello World!')
+>>> 'Hello' in c.co_consts
+True
+>>> c.co_consts=tuple(('Hello World!' if item=='Hello' else item) for item in c.co_consts)
 >>> c.exec()
 Hello World!
->>>
+>>> 
 >>> # Save to pickle files
 >>> import os,pickle
->>> temp=os.getenv('temp')
+>>> temp=os.getenv('temp') if os.name=='nt' else '/tmp'
 >>> with open(os.path.join(temp,"temp.pkl"),'wb') as f:
 ...     pickle.dump(c,f)
-...
+... 
+>>> 
 >>> # Execute bytecodes from pickle files
->>> f=open(os.path.join(temp,"temp.pkl"),'rb')
->>> pickle.load(f).to_func()()
+>>> with open(os.path.join(temp,"temp.pkl"),'rb') as f:
+...     pickle.load(f).to_func()()
+...
 Hello World!
+>>> 
 >>> # Convert to pyc files and import them
 >>> c.to_pycfile(os.path.join(temp,"temppyc.pyc"))
 >>> sys.path.append(temp)

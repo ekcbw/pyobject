@@ -7,7 +7,7 @@ except ImportError:
     from importlib._bootstrap import MAGIC_NUMBER
 from types import CodeType, FunctionType
 from collections import OrderedDict
-import marshal,builtins
+import marshal,builtins,io
 import dis
 import pickle
 import traceback
@@ -15,32 +15,30 @@ from pyobject import desc
 
 __all__ = ["Code"]
 
-_default_code=compile('','','exec')
-_is_py38=hasattr(_default_code, 'co_posonlyargcount') # 是否为3.8及以上版本
-_is_py310=hasattr(_default_code, 'co_linetable') # 是否为3.10及以上版本
-_is_py311=hasattr(_default_code, 'co_exceptiontable') # 是否为3.11及以上版本
+_default_code = compile('', '', 'exec')
+_is_py310 = sys.version_info >= (3, 10) # 是否为3.10及以上版本
+_is_py311 = sys.version_info >= (3, 11) # 是否为3.11及以上版本
 class Code:
     """
 # Example usage, also for doctest
 >>> def f():print("Hello")
-
+...
 >>> c=Code.fromfunc(f)
->>> c.co_consts in [(None, 'Hello'), ('Hello', None)]
+>>> 'Hello' in c.co_consts
 True
->>> # c.co_consts=(None, 'Hello World!') # 原先的代码
->>> # 兼容3.14，3.14中c.consts为('Hello', None)
 >>> c.co_consts=tuple(('Hello World!' if item=='Hello' else item) for item in c.co_consts)
 >>> c.exec()
 Hello World!
 >>> 
 >>> import os,pickle
->>> temp=os.getenv('temp')
+>>> temp=os.getenv('temp') if os.name=='nt' else '/tmp'
 >>> with open(os.path.join(temp,"temp.pkl"),'wb') as f:
 ...     pickle.dump(c,f)
 ... 
 >>> 
->>> f=open(os.path.join(temp,"temp.pkl"),'rb')
->>> pickle.load(f).to_func()()
+>>> with open(os.path.join(temp,"temp.pkl"),'rb') as f:
+...     pickle.load(f).to_func()()
+...
 Hello World!
 >>> 
 >>> c.to_pycfile(os.path.join(temp,"temppyc.pyc"))
@@ -85,8 +83,10 @@ Hello World!
               ('co_cellvars',())
               ])
         if not _is_py311: # Python 3.10
-            _default_args["co_flags"]=64 # NOFREE
+            _default_args["co_flags"] = 64 # NOFREE
+        if not hasattr(_default_code, 'co_qualname'):
             del _default_args['co_qualname']
+        if not hasattr(_default_code, 'co_exceptiontable'):
             del _default_args['co_exceptiontable']
     else:
         # 按顺序的字典
@@ -97,8 +97,7 @@ Hello World!
               ('co_stacksize',1),
               # 如果是函数中, 则为OPTIMIZED, NEWLOCALS, NOFREE
               ('co_flags',64), # NOFREE
-              ('co_code',b'd\x00S\x00'),# LOAD_CONST    0 (None)
-                                        # RETURN_VALUE
+              ('co_code',_default_code.co_code),
               ('co_consts',(None,)),
               ('co_names',()),
               ('co_varnames',()),
@@ -110,7 +109,7 @@ Hello World!
               ('co_cellvars',())
               ])
         # 3.8~3.9
-        if _is_py38:
+        if hasattr(_default_code, 'co_posonlyargcount'):
             _default_args['co_posonlyargcount']=0
             _default_args.move_to_end('co_posonlyargcount', last=False)
             _default_args.move_to_end('co_argcount', last=False)
@@ -206,8 +205,7 @@ The code argument can be either Code or the built-in CodeType."""
     @classmethod
     def fromfunc(cls,function):
         "Create a Code instance from a function object."
-        c=function.__code__
-        return cls(c)
+        return cls(function.__code__)
     @classmethod
     def fromstring(cls,string,mode='exec',filename=''):
         "Create a Code instance from a source code string using compile()."

@@ -4,16 +4,22 @@ from collections import defaultdict
 from warnings import warn
 try:
     from types import WrapperDescriptorType,MethodWrapperType,\
-        MethodDescriptorType,ClassMethodDescriptorType,ModuleType
+        MethodDescriptorType,ClassMethodDescriptorType,ModuleType,\
+        MappingProxyType
 except ImportError: # 低于3.7的版本
     from types import ModuleType
     from typing import WrapperDescriptorType,MethodWrapperType,\
-        MethodDescriptorType
+        MethodDescriptorType,MappingProxyType
     ClassMethodDescriptorType = type(dict.__dict__["fromkeys"])
 
 __all__=["make_list","make_iter","search"]
 _skip=(WrapperDescriptorType, MethodWrapperType,\
        MethodDescriptorType, ClassMethodDescriptorType) #自动忽略这些类型, 加快速度
+DICT_TYPES = [dict, MappingProxyType]
+if sys.version_info >= (3, 13): # 3.13+
+    FrameLocalsProxy = type((lambda:sys._getframe())().f_locals)
+    DICT_TYPES.append(FrameLocalsProxy)
+DICT_TYPES = tuple(DICT_TYPES)
 
 # 重写Python的内置函数dir
 def dir(obj):
@@ -40,16 +46,14 @@ def _make_iter(start_obj,recursions,traversed,all=False,show_error=True):
             # 经测试, 使用obj.__class__比使用type(obj)更快
             if obj.__class__ not in _skip:
                 yield obj
-                for obj in _make_iter(obj,recursions-1,traversed,all,show_error):
-                    yield obj
+                yield from _make_iter(obj,recursions-1,traversed,all,show_error)
     if isinstance(start_obj,(list,tuple)):
         for item in start_obj:
             if id(item) in traversed:continue
             if item.__class__ not in _skip:
                 yield item
-                for obj in _make_iter(item,recursions-1,traversed,all,show_error):
-                    yield obj
-    if isinstance(start_obj,dict):
+                yield from _make_iter(item,recursions-1,traversed,all,show_error)
+    if isinstance(start_obj, DICT_TYPES):
         for obj in start_obj.keys():
             if id(obj) not in traversed:
                 yield obj
@@ -57,22 +61,21 @@ def _make_iter(start_obj,recursions,traversed,all=False,show_error=True):
             if id(obj) in traversed:continue
             if obj.__class__ not in _skip:
                 yield obj
-                for o in _make_iter(obj,recursions-1,traversed,all,show_error):
-                    yield o
+                yield from _make_iter(obj,recursions-1,traversed,all,show_error)
 
 def make_iter(start_obj,recursions=3,all=False,show_error=True):
     """Create an iterator for an object.
-    The functionality and parameters are the same as make_list."""
-    traversed=set()
-    for obj in _make_iter(start_obj,recursions,traversed,all,show_error):
-        yield obj
-
-def make_list(start_obj,recursions=3,all=False,show_error=True):
-    """Create a list containing a large number of objects.
 start_obj: The object from which to start the search.
 recursions: The maximum recursion depth, with a minimum of 1 level.
 all: Whether to include attributes that start with an underscore (e.g., __init__) in the list.
-show_error: Whether to output exceptions to sys.stderr when an exception occurs within getattr()."""
+show_error: Whether to output exceptions to sys.stderr when an exception occurs within getattr().\
+"""
+    traversed=set()
+    yield from _make_iter(start_obj,recursions,traversed,all,show_error)
+
+def make_list(start_obj,recursions=3,all=False,show_error=True):
+    """Create a list containing a large number of objects.
+The functionality and parameters are the same as make_list."""
     return list(make_iter(start_obj,recursions,all,show_error))
 
 def _search(target,start_obj,recursions,traversed,search_str=False,
@@ -83,23 +86,27 @@ def _search(target,start_obj,recursions,traversed,search_str=False,
     for attr in dir(start_obj):
         if not verbose and attr.startswith("_"):
             continue
+        name="."+attr
+        if search_str and target in attr: # 搜索字符串的子串
+            results.append(name)
+
         try:
-            name="." + attr
-            if search_str and target in attr: # 搜索字符串的子串
-                results.append(name)
             obj=getattr(start_obj,attr)
-            if target == obj: # ==是为了处理数字、字符串等对象
-                results.append(name)
-            if obj.__class__ not in _skip: # 如果不忽略
-                if traversed.get(id(obj),0)>=recursions:continue
-                traversed[id(obj)] = recursions
-                result=_search(target,obj,recursions-1,traversed,search_str,
-                               verbose,show_error)
-                for path in result:
-                    results.append(name+path)
-        except Exception as err: # 忽略getattr()返回的AttributeError
-            if not isinstance(err,AttributeError) and show_error:
+        except AttributeError:continue
+        except Exception: # 忽略getattr()返回的AttributeError
+            if show_error:
                 traceback.print_exc()
+            continue
+
+        if target == obj: # ==是为了处理数字、字符串等对象
+            results.append(name)
+        if obj.__class__ not in _skip: # 如果不忽略
+            if traversed.get(id(obj),0)>=recursions:continue
+            traversed[id(obj)] = recursions
+            result=_search(target,obj,recursions-1,traversed,search_str,
+                            verbose,show_error)
+            for path in result:
+                results.append(name+path)
 
     if isinstance(start_obj,(list,tuple)): # 进一步搜索列表、元组项
         for i,obj in enumerate(start_obj):
@@ -115,7 +122,7 @@ def _search(target,start_obj,recursions,traversed,search_str=False,
                     results.append(name+path)
 
     if isinstance(start_obj,dict): # 进一步搜索字典项
-        for key in start_obj.keys():
+        for key in list(start_obj.keys()): # list：字典大小可能改变
             if (search_str and isinstance(key, str) and target in key) or target == key:
                 results.append(" (dictionary key %s)"%repr(key))
             name="[%s]"%repr(key)
